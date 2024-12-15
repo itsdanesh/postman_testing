@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 jobs:
   # Build Stage
   build:
-    name: Install Dependencies
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -37,7 +37,7 @@ jobs:
 
   # Test Stage
   test:
-    name: Run Tests
+    name: Test
     needs: build
     runs-on: ubuntu-latest
     services:
@@ -45,6 +45,8 @@ jobs:
         image: mvertes/alpine-mongo:latest
         ports:
           - 27017:27017
+    env:
+      MONGODB_URI: "mongodb://localhost:27017/serverTestDB"
 
     steps:
       - name: Checkout Code
@@ -56,11 +58,9 @@ jobs:
           path: server/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('server/package-lock.json') }}
 
-      - name: Run Tests and Newman
-        env:
-          MONGODB_URI: "mongodb://localhost:27017/serverTestDB"
+      - name: Run Tests
         run: |
-          cd part1/server
+          cd server
           npm run ci-test
 
   # Deploy Stage
@@ -85,5 +85,5 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
         run: |
-          git remote add heroku https://git.heroku.com/$HEROKU_APP_NAME.git
+          git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
           git push heroku main
