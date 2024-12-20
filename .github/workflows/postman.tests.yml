@@ -9,17 +9,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
+      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Install cross-env-shell
-        run: npm install -g cross-env-shell
+
+      # Install dependencies
       - name: Install Dependencies
         working-directory: server
-        run: npm install
+        run: |
+          npm install
 
   test:
     runs-on: ubuntu-latest
@@ -35,10 +39,21 @@ jobs:
           - 27017:27017
 
     steps:
-      - uses: actions/checkout@v3
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Run Tests
-        working-directory: server 
+      # Install dependencies
+      - name: Install Dependencies
+        working-directory: server
         run: |
-          npm run ci-test
-          # This will run dropdb.js, start the server, and execute tests using Newman
+          npm install
+
+      # Fix permissions (if necessary)
+      - name: Fix Node Modules Permissions
+        run: chmod -R 777 server/node_modules
+
+      # Run tests
+      - name: Run Tests
+        working-directory: server
+        run: npm run ci-test
