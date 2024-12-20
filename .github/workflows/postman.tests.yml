@@ -62,3 +62,10 @@ jobs:
         run: |
           cd server
           npm run ci-test
+        continue-on-error: false
+      - name: Debug Logs
+        if: failure()
+        run: |
+         echo "Server log:"
+         cat logs/server.log || echo "No server log found"
+
