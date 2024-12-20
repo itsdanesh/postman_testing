@@ -10,17 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # Step 3: Cache dependencies
       - name: Cache Node Modules
         uses: actions/cache@v3
         with:
@@ -29,12 +26,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules
 
-      # Step 4: Install dependencies
       - name: Install Dependencies
         working-directory: server
         run: npm install
 
-      # Step 5: Rebuild native modules (if necessary)
       - name: Rebuild Native Modules
         working-directory: server
         run: npm rebuild bcrypt || echo "Rebuild not required"
@@ -53,11 +48,9 @@ jobs:
           - 27017:27017
 
     steps:
-      # Step 1: Check out the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Restore cached dependencies
       - name: Restore Cached Node Modules
         uses: actions/cache@v3
         with:
@@ -66,19 +59,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules
 
-      # Step 3: Install dependencies (if cache is not restored)
       - name: Install Dependencies
         working-directory: server
         run: npm install
 
-      # Step 4: Start the server with readiness wait
+      - name: Kill Existing Processes on Port 3001
+        run: |
+          sudo lsof -t -i:3001 | xargs -r kill -9 || echo "No processes running on port 3001"
+
       - name: Start Server
         working-directory: server
         run: |
           npm start &
           sleep 15
 
-      # Step 5: Debug MongoDB and API readiness
       - name: Debug MongoDB and Server Health
         working-directory: server
         run: |
@@ -87,7 +81,6 @@ jobs:
           echo "Testing API health..."
           curl http://localhost:3001/api/health || echo "API not responding"
 
-      # Step 6: Run Newman tests
       - name: Run Tests
         working-directory: server
         run: npm run ci-test
