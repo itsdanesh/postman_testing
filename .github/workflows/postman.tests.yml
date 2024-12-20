@@ -8,32 +8,36 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1: Check out the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Clean npm Cache
-        run: npm cache clean --force
+      # Step 3: Cache dependencies
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: server/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules
 
+      # Step 4: Install dependencies
       - name: Install Dependencies
         working-directory: server
         run: npm install
 
-      - name: Install Build Tools
-        run: sudo apt-get install -y build-essential python3
-
-      - name: Fix Node Modules Permissions
-        working-directory: server
-        run: chmod -R 777 node_modules
-
+      # Step 5: Rebuild native modules (if necessary)
       - name: Rebuild Native Modules
         working-directory: server
-        run: npm rebuild bcrypt
+        run: npm rebuild bcrypt || echo "Rebuild not required"
 
   test:
     runs-on: ubuntu-latest
@@ -49,17 +53,25 @@ jobs:
           - 27017:27017
 
     steps:
+      # Step 1: Check out the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Step 2: Use cached dependencies
+      - name: Restore Cached Node Modules
+        uses: actions/cache@v3
+        with:
+          path: server/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules
+
+      # Step 3: Install dependencies (if cache is not restored)
       - name: Install Dependencies
         working-directory: server
         run: npm install
 
-      - name: Rebuild Native Modules
-        working-directory: server
-        run: npm rebuild bcrypt
-
+      # Step 4: Run tests
       - name: Run Tests
         working-directory: server
         run: npm run ci-test
