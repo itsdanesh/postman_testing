@@ -24,6 +24,13 @@ jobs:
         working-directory: server
         run: npm install
 
+      - name: Install Build Tools
+        run: sudo apt-get install -y build-essential python3
+
+      - name: Fix Node Modules Permissions
+        working-directory: server
+        run: chmod -R 777 node_modules
+
       - name: Rebuild Native Modules
         working-directory: server
         run: npm rebuild bcrypt
