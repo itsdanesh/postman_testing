@@ -13,7 +13,7 @@ const reviewRoute = require('./controllers/reviewController');
 // Variables
 var mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/serverTestDB';
 ;
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3001;
 
 // Connect to MongoDB
 mongoose.connect(mongoURI).catch(function(err) {
