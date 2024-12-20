@@ -9,7 +9,6 @@ on:
       - main
 
 jobs:
-  # Build Stage
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -20,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '18'
 
       - name: Install Dependencies
         run: |
@@ -35,7 +34,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
 
-  # Test Stage
   test:
     name: Test
     needs: build
@@ -58,10 +56,9 @@ jobs:
           path: server/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('server/package-lock.json') }}
 
-      - name: Ensure Permissions for cross-env
-        run: chmod +x ./server/node_modules/.bin/cross-env
-
       - name: Run Tests
+        env:
+          MONGODB_URI: "mongodb://localhost:27017/serverTestDB"
         run: |
           cd server
           npm run ci-test
