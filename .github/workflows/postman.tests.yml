@@ -1,71 +1,44 @@
-name: CI Pipeline
+name: CI Build and Test
 
 on:
   push:
     branches:
       - main
   pull_request:
-    branches:
-      - main
 
 jobs:
-  build:
-    name: Build
+  build-and-test:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install Dependencies
-        run: |
-          cd server
-          npm install
-
-      - name: Cache Node Modules
-        uses: actions/cache@v3
-        with:
-          path: server/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('server/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-  test:
-    name: Test
-    needs: build
-    runs-on: ubuntu-latest
     services:
       mongo:
-        image: mvertes/alpine-mongo:latest
+        image: mongo:6.0
         ports:
           - 27017:27017
-    env:
-      MONGODB_URI: "mongodb://localhost:27017/serverTestDB"
+        options: >-
+          --bind_ip 0.0.0.0
 
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Restore Cached Node Modules
-        uses: actions/cache@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          path: server/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('server/package-lock.json') }}
+          node-version: 18
 
-      - name: Run Tests
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Run tests
         env:
-          MONGODB_URI: "mongodb://localhost:27017/serverTestDB"
-        run: |
-          cd server
-          npm run ci-test
-        continue-on-error: false
-      - name: Debug Logs
-        if: failure()
-        run: |
-         echo "Server log:"
-         cat logs/server.log || echo "No server log found"
+          MONGODB_URI: mongodb://127.0.0.1:27017/serverTestDB
+        run: npm test
 
+      - name: Run Postman collection
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/serverTestDB
+        run: npm run ci-test
