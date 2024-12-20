@@ -36,29 +36,32 @@ jobs:
             ${{ runner.os }}-node-modules-
 
   # Test Stage
-  test:
-    name: Test
-    needs: build
-    runs-on: ubuntu-latest
-    services:
-      mongo:
-        image: mvertes/alpine-mongo:latest
-        ports:
-          - 27017:27017
-    env:
-      MONGODB_URI: "mongodb://localhost:27017/serverTestDB"
+   test:
+  name: Test
+  needs: build
+  runs-on: ubuntu-latest
+  services:
+    mongo:
+      image: mvertes/alpine-mongo:latest
+      ports:
+        - 27017:27017
+  env:
+    MONGODB_URI: "mongodb://localhost:27017/serverTestDB"
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Restore Cached Node Modules
-        uses: actions/cache@v3
-        with:
-          path: server/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('server/package-lock.json') }}
+    - name: Restore Cached Node Modules
+      uses: actions/cache@v3
+      with:
+        path: server/node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('server/package-lock.json') }}
 
-      - name: Run Tests
-        run: |
-          cd server
-          npm run ci-test
+    - name: Fix Execute Permissions
+      run: chmod +x ./server/node_modules/.bin/cross-env
+
+    - name: Run Tests
+      run: |
+        cd server
+        npm run ci-test
