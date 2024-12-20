@@ -11,7 +11,7 @@ const itemRoute = require('./controllers/itemController');
 const orderRoute = require('./controllers/orderController');
 const reviewRoute = require('./controllers/reviewController');
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb+srv://admin:admin@cluster0.zxyml1c.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0';
+var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/serverTestDB';
 ;
 var port = process.env.PORT || 3000;
 
