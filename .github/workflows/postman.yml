@@ -1,0 +1,40 @@
+name: CI Pipeline with API Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      # Step 1: Checkout Code
+      - uses: actions/checkout@v4
+
+      # Step 2: Install Dependencies (if applicable)
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      # Step 3: Install Postman CLI
+      - name: Install Postman CLI
+        run: |
+          powershell.exe -NoProfile -InputFormat None -ExecutionPolicy AllSigned -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://dl-cli.pstmn.io/install/win64.ps1'))"
+
+      # Step 4: Login to Postman CLI
+      - name: Login to Postman CLI
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+
+      # Step 5: Run API Tests
+      - name: Run API tests
+        run: |
+          postman collection run "23343795-a9b32b50-c2c8-4192-95d9-f9180c304fd4" -e "23343795-0fee1263-c512-4cdd-b473-038d43c2fd54"
+
+      # Optional: Include Debugging for Failures
+      - name: Debug Logs
+        if: failure()
+        run: |
+          echo "Test logs:"
+          cat newman-output.log || echo "No logs found."
