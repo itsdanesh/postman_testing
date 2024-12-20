@@ -15,7 +15,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-
+      - name: Install cross-env-shell
+        run: npm install -g cross-env-shell
       - name: Install Dependencies
         working-directory: server
         run: npm install
