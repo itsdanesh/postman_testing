@@ -62,28 +62,3 @@ jobs:
         run: |
           cd server
           npm run ci-test
-
-  # Deploy Stage
-  deploy:
-    name: Deploy to Heroku
-    needs: test
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
-
-      - name: Deploy to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-        run: |
-          git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
-          git push heroku main
