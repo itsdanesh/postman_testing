@@ -9,28 +9,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # Install dependencies
+      - name: Clean npm Cache
+        run: npm cache clean --force
+
       - name: Install Dependencies
         working-directory: server
-        run: |
-          npm install
+        run: npm install
+
+      - name: Rebuild Native Modules
+        working-directory: server
+        run: npm rebuild bcrypt
 
   test:
     runs-on: ubuntu-latest
-    needs: build  # This job depends on the successful completion of the 'build' job
+    needs: build
 
     env:
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}  # Access secret stored in GitHub Secrets
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
     services:
       mongo:
@@ -39,21 +42,17 @@ jobs:
           - 27017:27017
 
     steps:
-      # Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Install dependencies
       - name: Install Dependencies
         working-directory: server
-        run: |
-          npm install
+        run: npm install
 
-      # Fix permissions (if necessary)
-      - name: Fix Node Modules Permissions
-        run: chmod -R 777 server/node_modules
+      - name: Rebuild Native Modules
+        working-directory: server
+        run: npm rebuild bcrypt
 
-      # Run tests
       - name: Run Tests
         working-directory: server
         run: npm run ci-test
