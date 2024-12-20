@@ -57,7 +57,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Use cached dependencies
+      # Step 2: Restore cached dependencies
       - name: Restore Cached Node Modules
         uses: actions/cache@v3
         with:
@@ -71,7 +71,23 @@ jobs:
         working-directory: server
         run: npm install
 
-      # Step 4: Run tests
+      # Step 4: Start the server with readiness wait
+      - name: Start Server
+        working-directory: server
+        run: |
+          npm start &
+          sleep 15
+
+      # Step 5: Debug MongoDB and API readiness
+      - name: Debug MongoDB and Server Health
+        working-directory: server
+        run: |
+          echo "Testing MongoDB connection..."
+          curl http://127.0.0.1:27017 || echo "MongoDB not responding"
+          echo "Testing API health..."
+          curl http://localhost:3001/api/health || echo "API not responding"
+
+      # Step 6: Run Newman tests
       - name: Run Tests
         working-directory: server
         run: npm run ci-test
