@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "test": "cross-env MONGODB_URI=mongodb://127.0.0.1:27017/serverTestDB npm run newman-server",
     "ci-test": "npm run newman-server",
-    "newman-server": "cross-env PORT=3001 npm-run-all --race dropdb start newman-wait",
+    "newman-server": "cross-env PORT=3001 npm-run-all --parallel dropdb start newman-wait",
     "newman-wait": "wait-on http://localhost:3001/api && npm run newman",
     "newman": "newman run ./tests/server.postman_collection.json --env-var host=http://localhost:3001",
     "dropdb": "node ./tests/dropdb.js"
