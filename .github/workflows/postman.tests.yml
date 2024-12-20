@@ -58,7 +58,7 @@ jobs:
           path: server/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('server/package-lock.json') }}
 
-      - name: Fix Execute Permissions
+      - name: Ensure Permissions for cross-env
         run: chmod +x ./server/node_modules/.bin/cross-env
 
       - name: Run Tests
