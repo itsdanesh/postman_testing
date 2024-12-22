@@ -18,13 +18,18 @@ jobs:
         with:
           node-version: 14
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: server/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/server/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
         run: |
           cd server
           npm install
-        cache:
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          path: server/node_modules/
 
   test:
     name: Test
@@ -44,10 +49,13 @@ jobs:
         with:
           node-version: 14
 
-      - name: Install dependencies
-        run: |
-          cd server
-          npm install
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: server/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/server/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Run Tests
         env:
